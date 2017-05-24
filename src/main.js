@@ -75,73 +75,76 @@ setTimeout(function() {
 }, 2000)
 
 setTimeout(function() {
-  $('.description div > .task-list').each(function(index, taskList) {
+  $('.description div > .task-list').each(function(listIndex, taskList) {
     $(taskList).css({ position: 'relative' })
-    let $button = $('<button class="btn btn-sm" style="position: absolute; top: 0; right: 0;">Break apart</button>')
+    let $button = $('<button class="btn btn-sm" style="position: absolute; top: 0; right: 0; display: none;">Break apart</button>')
     const currentIssue = $('.issuable-meta .identifier a').text().replace(/#/, '')
 
+    $(taskList).on('mouseenter', function() { $button.show(); $(taskList).css({ background: '#f9f9f9', 'border-radius': '4px' }) })
+    $(taskList).on('mouseleave', function() { $button.hide(); $(taskList).css({ background: 'none' }) })
+
     $button.on('click', function(e) {
-
-
       let promises = []
 
-      $(taskList).find('.task-list-item').each(function(index, task) {
-        let $task = $(task).clone()
+      $(taskList).find('> .task-list-item').each(function(taskIndex, task) {
 
-        $task.first('input[type=checkbox]').remove()
+        let title = $(task)
+          .clone()
+          .children('a').replaceWith(function() { return $(this).text() }).end()
+          .children(':not(a)')
+          .remove()
+          .end() // remove all other children
+          .text().trim()
 
-        let title = $task.text().trim()
-        let description = `Relates to #${currentIssue}\n\n`
-        description += toMarkdown($task.html(), { gfm: true })
+
+        let description = `Relates to #${currentIssue}\n`
+        description += toMarkdown($(task).clone().find('input[type=checkbox]:first').remove().end().html(), { gfm: true })
         description = description.replace(title, '')
 
-        console.log($(task).html())
-        console.log(description)
-
-        // promises.push(sleep(index * 1000).then(function() {
-        //   return $.post({
-        //     url: credentials.url + '/projects/' + getProjectId() + '/issues',
-        //     data: { title, description }
-        //     dataType: 'json',
-        //     beforeSend: function(xhr){ xhr.setRequestHeader('PRIVATE-TOKEN', credentials.token);},
-        //   })
-        // }))
+        promises.push(sleep(taskIndex * 1000).then(function() {
+          return $.post({
+            url: credentials.url + '/projects/' + getProjectId() + '/issues',
+            data: { title, description },
+            dataType: 'json',
+            beforeSend: function(xhr){ xhr.setRequestHeader('PRIVATE-TOKEN', credentials.token);},
+          })
+        }))
       })
 
-      // $.when.apply($, promises).done(function () {
-      //   let issues = []
-      //
-      //   if (promises.length == 1) {
-      //     issues.push(arguments[0])
-      //   } else {
-      //     $.each(arguments, function(index, responseData){
-      //       issues.push(responseData)
-      //     });
-      //   }
-      //
-      //   $.get({
-      //     url: credentials.url + '/projects/' + getProjectId() + '/issues/' + currentIssue,
-      //     beforeSend: function(xhr){ xhr.setRequestHeader('PRIVATE-TOKEN', credentials.token);}
-      //   }).then(function(oldIssue) {
-      //     $.each(issues, function(index, newIssue) {
-      //       if (newIssue.title) {
-      //         oldIssue.description = oldIssue.description.replace(newIssue.title, `${newIssue.title} (#${newIssue.iid})`)
-      //       }
-      //     })
-      //
-      //     $.ajax({
-      //       url: credentials.url + '/projects/' + getProjectId() + '/issues/' + currentIssue,
-      //       beforeSend: function(xhr){ xhr.setRequestHeader('PRIVATE-TOKEN', credentials.token);},
-      //       method: 'PUT',
-      //       data: {
-      //         description: oldIssue.description
-      //       },
-      //       dataType: 'json'
-      //     }).then(function() {
-      //       window.location.reload()
-      //     })
-      //   })
-      // })
+      $.when.apply($, promises).done(function () {
+        let issues = []
+
+        if (promises.length == 1) {
+          issues.push(arguments[0])
+        } else {
+          $.each(arguments, function(index, responseData){
+            issues.push(responseData)
+          });
+        }
+
+        $.get({
+          url: credentials.url + '/projects/' + getProjectId() + '/issues/' + currentIssue,
+          beforeSend: function(xhr){ xhr.setRequestHeader('PRIVATE-TOKEN', credentials.token);}
+        }).then(function(oldIssue) {
+          $.each(issues, function(index, newIssue) {
+            if (newIssue.title) {
+              oldIssue.description = oldIssue.description.replace(newIssue.title, `${newIssue.title} (#${newIssue.iid})`)
+            }
+          })
+
+          $.ajax({
+            url: credentials.url + '/projects/' + getProjectId() + '/issues/' + currentIssue,
+            beforeSend: function(xhr){ xhr.setRequestHeader('PRIVATE-TOKEN', credentials.token);},
+            method: 'PUT',
+            data: {
+              description: oldIssue.description
+            },
+            dataType: 'json'
+          }).then(function() {
+            window.location.reload()
+          })
+        })
+      })
     })
     $(taskList).append($button)
   })
