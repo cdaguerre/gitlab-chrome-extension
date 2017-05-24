@@ -1,0 +1,25 @@
+{
+  "name": "Gitlab",
+  "description": "Gitlab extension for Chrome",
+  "version": "1.1",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://*/*"],
+      "js": ["dist/bundle.js"]
+    }
+  ],
+  "icons": {
+    "16": "image/icon-16x16.png",
+    "32": "image/icon-32x32.png",
+    "96": "image/icon-96x96.png"
+  },
+  "options_ui": {
+    "page": "src/options.html",
+    "chrome_style": true
+  },
+  "manifest_version": 2
+}

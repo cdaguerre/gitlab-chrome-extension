@@ -1,0 +1,21 @@
+{
+  "dependencies": {
+    "jquery": "^3.2.1"
+  },
+  "watch": {
+    "build": {
+      "patterns": [
+        "src"
+      ],
+      "extensions": "js,html,css",
+      "quiet": false
+    }
+  },
+  "scripts": {
+    "build": "browserify src/main.js >| dist/bundle.js",
+    "watch": "npm-watch"
+  },
+  "devDependencies": {
+    "browserify": "^14.3.0"
+  }
+}
