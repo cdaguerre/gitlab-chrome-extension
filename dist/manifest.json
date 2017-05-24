@@ -9,7 +9,7 @@
   "content_scripts": [
     {
       "matches": ["https://*/*"],
-      "js": ["dist/bundle.js"]
+      "js": ["bundle.js"]
     }
   ],
   "icons": {
@@ -18,7 +18,7 @@
     "96": "image/icon-96x96.png"
   },
   "options_ui": {
-    "page": "src/options.html",
+    "page": "options.html",
     "chrome_style": true
   },
   "manifest_version": 2
